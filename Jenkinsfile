@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'docker-dashboard'
         IMAGE_TAG = "latest"
-        
+        FULL_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
         // DockerHub credentials ID in Jenkins
         DOCKERHUB_CRED = 'DOCKER_HUB'
         
@@ -36,7 +36,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh"""
-                docker build -t ("${IMAGE_NAME}:${IMAGE_TAG}")
+                docker build -t ${FULL_IMAGE} .
                 """
                 }
             }
@@ -47,8 +47,8 @@ pipeline {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CRED) {
                         sh"""
-                        docker image ("${IMAGE_NAME}:${IMAGE_TAG}") tag ("funmicra/${IMAGE_NAME}:${IMAGE_TAG}")
-                        docker image ("funmicra/${IMAGE_NAME}:${IMAGE_TAG}") push()
+                        docker image ${FULL_IMAGE} tag ("funmicra/${FULL_IMAGE}")
+                        docker push ("funmicra/${FULL_IMAGE}") 
                         """
                     }
                 }
