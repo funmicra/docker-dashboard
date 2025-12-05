@@ -52,7 +52,7 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_HUB) {
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKERHUB_CRED}") {
                         sh """
                         docker tag ${FULL_IMAGE} ${DOCKERHUB_REPO}:${IMAGE_TAG}
                         docker tag ${FULL_IMAGE} ${DOCKERHUB_REPO}:${BUILD_TAG}
@@ -67,7 +67,7 @@ pipeline {
         stage('Push to Private Registry') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.black-crab.cc', nexus_registry_login) {
+                    docker.withRegistry('https://registry.black-crab.cc', "${PRIVATE_REG_CRED}") {
                         sh """
                         docker tag ${FULL_IMAGE} ${PRIVATE_REG_REPO}:${IMAGE_TAG}
                         docker tag ${FULL_IMAGE} ${PRIVATE_REG_REPO}:${BUILD_TAG}
