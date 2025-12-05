@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Docker image name & tags
         IMAGE_NAME = 'docker-dashboard'
         IMAGE_TAG = "latest"
         
@@ -15,13 +14,15 @@ pipeline {
         // SSH credentials ID for remote server
         SSH_CRED = 'DEBIANSERVER'
         
-        // Remote server info
         REMOTE_HOST = '192.168.88.22'
         REMOTE_USER = 'funmicra'
+        
+        // Namespaces / repos
+        DOCKERHUB_REPO = 'funmicra/docker-dashboard'
+        PRIVATE_REG_REPO = 'registry.black-crab.cc/docker-dashboard'
     }
 
     triggers {
-        // Trigger on GitHub push
         githubPush()
     }
 
@@ -44,9 +45,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CRED) {
-                        // Tag with your username/namespace
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("funmicra/${IMAGE_NAME}:${IMAGE_TAG}")
-                        docker.image("funmicra/${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("${DOCKERHUB_REPO}:${IMAGE_TAG}")
+                        docker.image("${DOCKERHUB_REPO}:${IMAGE_TAG}").push()
                     }
                 }
             }
@@ -56,7 +56,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.black-crab.cc', PRIVATE_REG_CRED) {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("${PRIVATE_REG_REPO}:${IMAGE_TAG}")
+                        docker.image("${PRIVATE_REG_REPO}:${IMAGE_TAG}").push()
                     }
                 }
             }
@@ -66,13 +67,12 @@ pipeline {
             steps {
                 script {
                     sshagent([SSH_CRED]) {
-                        // Pull the new image on remote server
                         sh """
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
-                            docker pull registry.black-crab.cc/${IMAGE_NAME}:${IMAGE_TAG} &&
+                            docker pull ${PRIVATE_REG_REPO}:${IMAGE_TAG} &&
                             docker stop ${IMAGE_NAME} || true &&
                             docker rm ${IMAGE_NAME} || true &&
-                            docker run -d --name ${IMAGE_NAME} -v /var/run/docker.sock:/var/run/docker.sock registry.black-crab.cc/${IMAGE_NAME}:${IMAGE_TAG}
+                            docker run -d --name ${IMAGE_NAME} -v /var/run/docker.sock:/var/run/docker.sock ${PRIVATE_REG_REPO}:${IMAGE_TAG}
                         '
                         """
                     }
