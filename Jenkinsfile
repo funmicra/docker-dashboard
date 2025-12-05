@@ -35,8 +35,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                sh"""
+                docker build -t ("${IMAGE_NAME}:${IMAGE_TAG}")
+                """
                 }
             }
         }
@@ -45,24 +46,25 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CRED) {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("funmicra/${IMAGE_NAME}:${IMAGE_TAG}")
-                        docker.image("funmicra/${IMAGE_NAME}:${IMAGE_TAG}").push()
-
+                        sh"""
+                        docker image ("${IMAGE_NAME}:${IMAGE_TAG}") tag ("funmicra/${IMAGE_NAME}:${IMAGE_TAG}")
+                        docker image ("funmicra/${IMAGE_NAME}:${IMAGE_TAG}") push()
+                        """
                     }
                 }
             }
         }
 
-        stage('Push to Private Registry') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.black-crab.cc', PRIVATE_REG_CRED) {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("${PRIVATE_REG_REPO}:${IMAGE_TAG}")
-                        docker.image("${PRIVATE_REG_REPO}:${IMAGE_TAG}").push()
-                    }
-                }
-            }
-        }
+        // stage('Push to Private Registry') {
+        //     steps {
+        //         script {
+        //             docker.withRegistry('https://registry.black-crab.cc', PRIVATE_REG_CRED) {
+        //                 docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("${PRIVATE_REG_REPO}:${IMAGE_TAG}")
+        //                 docker.image("${PRIVATE_REG_REPO}:${IMAGE_TAG}").push()
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Deploy to Remote Server') {
             steps {
