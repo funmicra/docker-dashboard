@@ -46,14 +46,15 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CRED) {
-                        sh"""
-                        docker image ${FULL_IMAGE} tag ("funmicra/${FULL_IMAGE}")
-                        docker push ("funmicra/${FULL_IMAGE}") 
+                        sh """
+                        docker tag ${FULL_IMAGE} funmicra/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push funmicra/${IMAGE_NAME}:${IMAGE_TAG}
                         """
                     }
                 }
             }
         }
+
 
         // stage('Push to Private Registry') {
         //     steps {
