@@ -4,7 +4,11 @@ pipeline {
     environment {
         IMAGE_NAME = 'docker-dashboard'
         IMAGE_TAG = "latest"
+        BUILD_TAG = "${env.BUILD_NUMBER}"
+        
         FULL_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
+        BUILD_IMAGE = "${IMAGE_NAME}:${BUILD_TAG}"
+        
         // DockerHub credentials ID in Jenkins
         DOCKERHUB_CRED = 'DOCKER_HUB'
         
@@ -35,10 +39,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh"""
+                sh """
                 docker build -t ${FULL_IMAGE} .
+                docker tag ${FULL_IMAGE} ${BUILD_IMAGE}
                 """
-                }
             }
         }
 
@@ -47,25 +51,30 @@ pipeline {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CRED) {
                         sh """
-                        docker tag ${FULL_IMAGE} funmicra/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push funmicra/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker tag ${FULL_IMAGE} ${DOCKERHUB_REPO}:${IMAGE_TAG}
+                        docker tag ${FULL_IMAGE} ${DOCKERHUB_REPO}:${BUILD_TAG}
+                        docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}
+                        docker push ${DOCKERHUB_REPO}:${BUILD_TAG}
                         """
                     }
                 }
             }
         }
 
-
-        // stage('Push to Private Registry') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry('https://registry.black-crab.cc', PRIVATE_REG_CRED) {
-        //                 docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("${PRIVATE_REG_REPO}:${IMAGE_TAG}")
-        //                 docker.image("${PRIVATE_REG_REPO}:${IMAGE_TAG}").push()
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Push to Private Registry') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.black-crab.cc', PRIVATE_REG_CRED) {
+                        sh """
+                        docker tag ${FULL_IMAGE} ${PRIVATE_REG_REPO}:${IMAGE_TAG}
+                        docker tag ${FULL_IMAGE} ${PRIVATE_REG_REPO}:${BUILD_TAG}
+                        docker push ${PRIVATE_REG_REPO}:${IMAGE_TAG}
+                        docker push ${PRIVATE_REG_REPO}:${BUILD_TAG}
+                        """
+                    }
+                }
+            }
+        }
 
         stage('Deploy to Remote Server') {
             steps {
