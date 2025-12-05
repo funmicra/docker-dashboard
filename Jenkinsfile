@@ -30,10 +30,6 @@ pipeline {
         PRIVATE_REG_REPO = 'registry.black-crab.cc/docker-dashboard'
     }
 
-    triggers {
-        githubPush()
-    }
-
     stages {
         stage('Checkout') {
             steps {
