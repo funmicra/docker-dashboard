@@ -1,0 +1,50 @@
+# ----------------------
+# Python
+# ----------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.pytest_cache/
+*.coverage
+*.egg-info/
+dist/
+build/
+
+# ----------------------
+# Virtual environments
+# ----------------------
+venv/
+.env/
+.env.*.local
+
+# ----------------------
+# Docker
+# ----------------------
+*.log
+docker-compose.override.yml
+*.dockerignore
+*.tar
+docker-dashboard*.tar
+__pycache__/
+*.pyc
+*.pyo
+
+# ----------------------
+# IDE / Editor
+# ----------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.orig
+
+# ----------------------
+# OS files
+# ----------------------
+.DS_Store
+Thumbs.db
+infra_status_dashboard.py
+proxmox_dashboard.py
