@@ -43,7 +43,7 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/funmicra', DOCKERHUB_CRED) {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CRED) {
                         docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("funmicra/${IMAGE_NAME}:${IMAGE_TAG}")
                         docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
                     }
