@@ -35,9 +35,6 @@ COPY --from=builder /install /usr/local
 # Copy the script
 COPY docker_dashboard.py .
 
-# Optional: copy .env if you want defaults inside image
-COPY .env ./
-
 # Install runtime-only dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-client \
