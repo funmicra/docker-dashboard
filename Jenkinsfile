@@ -44,8 +44,9 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CRED) {
+                        // Tag with your username/namespace
                         docker.image("${IMAGE_NAME}:${IMAGE_TAG}").tag("funmicra/${IMAGE_NAME}:${IMAGE_TAG}")
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        docker.image("funmicra/${IMAGE_NAME}:${IMAGE_TAG}").push()
                     }
                 }
             }
