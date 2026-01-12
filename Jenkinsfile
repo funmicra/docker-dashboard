@@ -14,26 +14,27 @@ pipeline {
         BUILD_IMAGE = "${IMAGE_NAME}:${BUILD_TAG}"
         
         // DockerHub credentials ID in Jenkins
-        DOCKERHUB_CRED = 'DOCKER_HUB'
+        DOCKERHUB_CRED = 'DOCKER_HUB_CREDENTIALS'
         
         // Private registry credentials ID
-        PRIVATE_REG_CRED = 'nexus_registry_login'
+        PRIVATE_REG_CRED = 'NEXUS_REGISTRY_LOGIN'
         
         // SSH credentials ID for remote server
         SSH_CRED = 'DEBIANSERVER'
         
         REMOTE_HOST = '192.168.88.22'
-        REMOTE_USER = 'funmicra'
+        REMOTE_USER = 'ansible'
         
         // Namespaces / repos
         DOCKERHUB_REPO = 'funmicra/docker-dashboard'
-        PRIVATE_REG_REPO = 'registry.black-crab.cc/docker-dashboard'
+        PRIVATE_REG_REPO = 'registry.syndicate/docker-dashboard'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/funmicra/docker-dashboard.git', branch: 'master'
+                git url: 'https://github.com/funmicra/docker-dashboard.git', 
+                branch: 'master'
             }
         }
 
@@ -64,7 +65,7 @@ pipeline {
         stage('Push to Private Registry') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.black-crab.cc', "${PRIVATE_REG_CRED}") {
+                    docker.withRegistry('https://registry.syndicate', "${PRIVATE_REG_CRED}") {
                         sh """
                         docker tag ${FULL_IMAGE} ${PRIVATE_REG_REPO}:${IMAGE_TAG}
                         docker tag ${FULL_IMAGE} ${PRIVATE_REG_REPO}:${BUILD_TAG}
